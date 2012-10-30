@@ -1,11 +1,11 @@
-.phony: clean
+.phony: clean run
 
 CC=gcc
 
-run: clean test
+run: test
 	$(CURDIR)/test
 
-test: 
+test: main.c
 	$(CC) -std=c99 -lm -o test main.c
 
 clean:
