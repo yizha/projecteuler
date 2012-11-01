@@ -15,7 +15,7 @@ int is_palindrome(int n) {
     return 1;
 }
 
-int main(char* args) {
+int main(int argc, char **argv) {
     int a = 999;
     int b = 0;
     int m = 1;

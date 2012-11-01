@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <math.h>
 
-int main(char* args) {
+int main(int argc, char **argv) {
     int primes[21];
     for (int i = 0; i < 21; i++) {
         primes[i] = 1;

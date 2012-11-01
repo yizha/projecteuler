@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-int main(char* args) {
+int main(int argc, char **argv) {
     int n = 0;
     int sum = 0;
     while (n < 1000) {

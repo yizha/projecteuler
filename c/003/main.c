@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <math.h>
 
-int main(char* args) {
+int main(int argc, char **argv) {
     long long n = 600851475143L;
     long long lf = 1;
     if ((n%2) == 0) {
