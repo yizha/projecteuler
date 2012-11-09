@@ -143,7 +143,27 @@ void print_array1(int *p_num, int len) {
     printf("\n");
 }
 
-int main(int argc, char* argv) {
+void solve() {
+    
+    // find primes under 1000000 
+    int numbers[1000000];
+    int cnt = 0;
+    for (int i = 2; i < 1000000; i++) {
+        numbers[i] = 1;
+    }   
+    numbers[0] = 0;
+    numbers[1] = 0;
+    for (int i = 2; i < 1000000; i++) {
+        if (numbers[i]) {
+            cnt++;
+            int j = i + i;
+            while (j < 1000000) {
+                numbers[j] = 0;
+                j = j + i;
+            }
+        }
+    }
+
     int i = 2; // start from 2-digits number
     while (1) {
         int *p = (int*) malloc(i * sizeof(int));
@@ -163,7 +183,10 @@ int main(int argc, char* argv) {
                     int primes[10];
                     int a = 0;
                     while (next_number(p, p_num, i)) {
-                        int n = is_prime(p_num, i);
+                        //int n = is_prime(p_num, i);
+                        int n = 0;
+                        for (int x = 0; x < i; x++) n = 10 * n + p_num[x];
+                        if (numbers[n] != 1) n = 0;
                         if (n > 0) {
                             prime_cnt++;
                             primes[a++] = n;
@@ -173,7 +196,7 @@ int main(int argc, char* argv) {
                     //if (prime_cnt > 0) printf("\n");
                     if (prime_cnt == 8) {
                         printf("the prime = %d\n", primes[0]);
-                        return 0;
+                        return;
                     }
                 }
             }
@@ -183,4 +206,9 @@ int main(int argc, char* argv) {
         free(p_num);
         i++;
     }
+}
+
+int main(int argc, char* argv) {
+    solve();
+    return 0;
 }
