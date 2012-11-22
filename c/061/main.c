@@ -13,8 +13,8 @@
 typedef struct _node {
     int head;
     int cnt;
-    int tail[500];
-    int type[500];
+    int tail[100];
+    int type[100];
 } Node;
 
 int search(int level, int *parts, Node *nodes, int *marks) {
@@ -54,12 +54,12 @@ void print_nodes(Node *nodes) {
     }
 }
 
-void fill_nodes(Node *nodes, int *oct_head, int *oct_tail) {
+void fill_nodes(Node *nodes) {
     // init
     for (int i = 10; i < 100; i++) {
         Node *node = nodes + i;
         node->head = i;
-        for (int j = 0; j < 500; j++) {
+        for (int j = 0; j < 100; j++) {
             node->tail[j] = 0;
             node->type[j] = -1;
         }
@@ -122,6 +122,7 @@ void fill_nodes(Node *nodes, int *oct_head, int *oct_tail) {
     }
     k++;
     // Octagonal    P8,n=n(3n-2)        1, 8, 21, 40, 65, ...  -->  n=19~58,  40
+    /*
     for (int i = 19; i <= 58; i++) {
         int n = i*(3*i-2);
         int head = n / 100;
@@ -135,16 +136,25 @@ void fill_nodes(Node *nodes, int *oct_head, int *oct_tail) {
         node->cnt++;
     }
     k++;
+    */
 }
 
 int main(int argc, char* argv) {
-
     Node nodes[100];
-    int oct_head[40];
-    int oct_tail[40];
-    fill_nodes(nodes, oct_head, oct_tail);
+    fill_nodes(nodes);
     //print_nodes(nodes);
     //return 0;
+
+    int oct_head[40];
+    int oct_tail[40];
+    for (int i = 19; i <= 58; i++) {
+        int n = i*(3*i-2);
+        int head = n / 100;
+        int tail = n % 100;
+        int idx = i - 19;
+        oct_head[idx] = head;
+        oct_tail[idx] = tail;
+    }
 
     int level;
     int parts[7];
@@ -185,4 +195,6 @@ int main(int argc, char* argv) {
     }
     printf("\n");
     printf("sum=%d\n", sum);
+
+    return 0;
 }
