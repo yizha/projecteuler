@@ -1,9 +1,19 @@
 #include <stdio.h>
 #include <math.h>
+#include <malloc.h>
 
-int _multiply(int *a, int *b, int a_size, int b_size) {
+typedef struct _bigint {
+    int num[1000];
+    int size;
+} BigInt;
+
+void _multiply(BigInt *big_a, BigInt *big_b) {
     int t[1000] = {0};
     int size;
+    int *a = big_a->num;
+    int *b = big_b->num;
+    int a_size = big_a->size;
+    int b_size = big_b->size;
     for (int i = 0; i < b_size; i++) {
         int overflow = 0;
         int j = 0;
@@ -24,15 +34,54 @@ int _multiply(int *a, int *b, int a_size, int b_size) {
     for (int i = 0; i < size; i++) {
         a[i] = t[i];
     }
-    return size;
+    big_a->size = size;
 }
 
-int equals(int *a, int *b, int a_size, int b_size) {
-    if (a_size != b_size) return 0;
-    for (int i = 0; i < a_size; i++) {
-        if (a[i] != b[i]) return 0;
+void _add(BigInt *big_a, BigInt *big_b) {
+    int *a = big_a->num;
+    int *b = big_b->num;
+    int a_size = big_a->size;
+    int b_size = big_b->size;
+    int overflow = 0;
+    int *x;
+    int min_size;
+    int max_size;
+    if (a_size > b_size) {
+        max_size = a_size;
+        min_size = b_size;
+        x = a;
+    } else {
+        max_size = b_size;
+        min_size = a_size;
+        x = b;
     }
-    return 1;
+    for (int i = 0; i < min_size; i++) {
+        int t = a[i] + b[i] + overflow;
+        a[i] = t % 10;
+        overflow = t / 10;
+    }
+    for (int i = min_size; i < max_size; i++) {
+        int t = x[i] + overflow;
+        a[i] = t % 10;
+        overflow = t / 10;
+    }
+    if (overflow > 0) {
+        while (overflow > 0) {
+            a[max_size++] = overflow % 10;
+            overflow = overflow / 10;
+        }
+    }
+    big_a->size = max_size; 
+}
+
+int compare(BigInt *a, BigInt *b) {
+    if (a->size > b->size) return 1;
+    if (a->size < b->size) return -1;
+    for (int i = a->size - 1; i >= 0; i--) {
+        if (a->num[i] > b->num[i]) return 1;
+        if (a->num[i] < b->num[i]) return -1;
+    }
+    return 0;
 }
 
 int is_perfect_square(int n) {
@@ -44,83 +93,135 @@ int is_perfect_square(int n) {
     return 0;
 }
 
-int int_to_array(int n, int *a) {
+void to_bigint(int n, BigInt *a) {
     int size = 0;
     while (n > 0) {
-        a[size++] = n % 10;
+        a->num[size++] = n % 10;
         n = n / 10;
     }
-    return size;
+    a->size = size;
 }
 
-void print_int_array(int *a, int size) {
-    for (int i = size - 1; i >= 0; i--) {
-        printf("%d", a[i]);
+void print_bigint(BigInt *a) {
+    for (int i = a->size - 1; i >= 0; i--) {
+        printf("%d", a->num[i]);
     }
+}
+
+void next_a(BigInt *big_a, int n, double n_root, int *b, int *c) {
+    if ((*b) == 0) {
+        int a = floor(n_root);
+        *b = n - a * a;
+        *c = a;
+        to_bigint(a, big_a);
+    } else {
+        int a = floor((n_root + (*c))/(*b));
+        *c = (*c) - a * (*b);
+        int t = n - (*c) * (*c);
+        *b = t / (*b);
+        *c = -1 * (*c);
+        to_bigint(a, big_a);
+    }
+}
+
+int verify(BigInt *left, BigInt *right, BigInt *x, BigInt *d, BigInt *y, BigInt *one) {
+    for (int i = 0; i < x->size; i++) {
+        left->num[i] = x->num[i];
+    }
+    left->size = x->size;
+    for (int i = 0; i < y->size; i++) {
+        right->num[i] = y->num[i];
+    }
+    right->size = x->size;
+
+    _multiply(left, left);
+
+    _multiply(right, right);
+    _multiply(right, d);
+    _add(right, one);
+
+    return (compare(left, right) == 0);
+}
+
+void next_frac(BigInt *big_a, BigInt *p0, BigInt *p1, BigInt *p2) {
+    BigInt *p = p2;
+    p2 = p1;
+    p1 = p0;
+    p0 = p;
+    p0->size = p1->size;
+    for (int i = 0; i < p1->size; i++) {
+        p0->num[i] = p1->num[i];
+    }
+    
+    _multiply(p0, big_a);
+    _add(p0, p2);
+}
+
+void solve() {
+
+    BigInt *p = (BigInt*) malloc(11*sizeof(BigInt));
+
+    BigInt *left = p;
+    BigInt *right = p + 1;
+
+    BigInt *d = p + 2;
+    BigInt *one = p + 3;
+    one->size = 1;
+    one->num[0] = 1;
+
+    BigInt *num0 = p + 4;
+    BigInt *num1 = p + 5;
+    BigInt *num2 = p + 6;
+
+    BigInt *denorm0 = p + 7;
+    BigInt *denorm1 = p + 8;
+    BigInt *denorm2 = p + 9;
+
+    BigInt *big_a = p + 10;
+
+    for (int n = 2; n <= 13; n++) {
+        if (is_perfect_square(n)) continue;
+
+        to_bigint(n, d);
+        double n_root = sqrt(n);
+        int b = 0;
+        int c = 0;
+
+        num0->num[0] = 1;
+        num0->size = 1;
+        num1->num[0] = 0;
+        num1->size = 1;
+
+        denorm0->num[0] = 0;
+        denorm0->size = 1;
+        denorm1->num[0] = 1;
+        denorm1->size = 1;       
+
+        do {
+            next_a(big_a, n, n_root, &b, &c);
+            next_frac(big_a, num0, num1, num2);
+            next_frac(big_a, denorm0, denorm1, denorm2);
+        } while (verify(left, right, num0, d, denorm0, one) != 0);
+
+        print_bigint(num0);
+        printf("^2 - %d*", n);
+        print_bigint(denorm0);
+        printf("^2 = 1\n");
+    }
+
+    free(p);
 }
 
 int main(int argc, char* argv) {
-    //printf("%u\n", 0xFFFFFFFF);
-    /*int a[1000]; 
-    a[0] = 9;
-    a[1] = 7;
-    a[2] = 6;
-    a[3] = 2;
-    int b[] = {3,1};
-    int size = _multiply(a, a, 4, 4);
-    printf("size=%d\n", size);
-    printf("2679^2 =");print_int_array(a, size);
-    return 0;*/
+    /*int n = 23;
+    double n_root = sqrt(n);
+    int b = 0;
+    int c = 0;
 
-    int max_d = 0;
-    int max_x = 0;
-    int max_y = 0;
-    int x1a[1000];
-    int x2a[1000];
-    int ya[1000];
-    int da[5];
-    int x1_size;
-    int x2_size;
-    int y_size;
-    int d_size;
-    int one[1] = {1};
-    for (int d = 62; d <= 100; d++) {
-        if (is_perfect_square(d)) continue;
-        int y = 0;
-        while (1) {
-            y++;
-            /*
-            int t = y % 10;
-            int a = (t * t * (d % 10)) % 10;
-            if (a != 0 && a != 3 && a != 4 && a != 5 && a != 8 && a != 9) continue;
-            */
-            int x = floor(sqrt(d) * y) + 1;
-            //printf("x=%d\n", x);
-            x1_size = int_to_array(x + 1, x1a);
-            x2_size = int_to_array(x - 1, x2a);
-            y_size = int_to_array(y, ya);
-            //printf("y=");print_int_array(ya, y_size);
-            d_size = int_to_array(d, da);
-            //printf("d=");print_int_array(da, d_size);
-            x1_size = _multiply(x1a, x2a, x1_size, x2_size);
-            //printf("(x+1)*(x-1)=");print_int_array(x1a, x1_size);
-            y_size = _multiply(ya, ya, y_size, y_size);
-            //printf("y^2=");print_int_array(ya, y_size);
-            y_size = _multiply(ya, da, y_size, d_size);
-            //printf("d*y^2=");print_int_array(ya, y_size);
-            /*printf("x=%d,d=%d,y=%d\n", x, d, y);
-            printf("(x+1)*(x-1)=");print_int_array(x1a, x1_size);
-            printf("\n");
-            printf("      d*y^2=");print_int_array(ya, y_size);
-            printf("\n");*/
-            //printf("\n");
-            if (!equals(x1a, ya, x1_size, y_size)) continue;
-            /*int b = (((x+1)%10)*((x-1)%10));
-            if (a != b) continue;*/
-            printf("%d^2-%d*%d^2=1\n", x, d, y);
-            //printf("d=%d, x=%d\n",d,x);
-            break;
-        }
-    }
-    //printf("x=%llu\n",max);
+    for (int i = 0; i < 20; i++) {
+        next_a(bign, n_root, &b, &c);
+        printf("a=%d,b=%d,c=%d\n", a, b, c);
+    }*/
+
+    solve();
 }

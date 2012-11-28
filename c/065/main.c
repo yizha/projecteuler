@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <malloc.h>
 
 int _multiple(int n, int *a, int size) {
     int overflow = 0;
@@ -113,7 +114,7 @@ void calc_e(int n, int *frac, int *num, int *denorm,
     *num_size = _add(num, t, *num_size, t_size);
 }
 
-int main(int argc, char* argv) {
+void solve() {
     int frac[120];
     frac[0] = 2;
     int j = 1;
@@ -153,6 +154,58 @@ int main(int argc, char* argv) {
     int sum = 0;
     for (int i = 0; i < num_size; i++) sum = sum + num[i];
     printf("sum=%d\n", sum);
+}
 
-    return 0;
+typedef struct _bigint {
+    int num[1000];
+    int size;
+} BigInt;
+
+void solve1() {
+    int a[120];
+    a[0] = 2;
+    int j = 1;
+    int k = 1;
+    for (int i = 0; i <= 102/3; i++) {
+        a[j++] = 1;
+        a[j++] = 2*(k++);
+        a[j++] = 1;
+    }
+
+    BigInt *num = (BigInt*) malloc(3*sizeof(BigInt));
+    BigInt *p0 = num;
+    BigInt *p1 = p0 + 1;
+    BigInt *p2 = p1 + 1;
+
+    p0->num[0] = 1;
+    p0->size = 1;
+    p1->num[0] = 0;
+    p1->size = 1;
+
+    BigInt *p;
+    for (int i = 0; i < 100; i++) {
+        p = p2;
+        p2 = p1;
+        p1 = p0;
+        p0 = p;
+        p0->size = p1->size;
+        for (int i = 0; i < p1->size; i++) {
+            p0->num[i] = p1->num[i];
+        }
+        
+        p0->size = _multiple(a[i], p0->num, p0->size);
+        p0->size = _add(p0->num, p2->num, p0->size, p2->size);
+    }
+
+    for (int i = p0->size - 1; i >= 0; i--) printf("%d", p0->num[i]);
+    printf("(%d)\n", p0->size);
+    
+    int sum = 0;
+    for (int i = 0; i < p0->size; i++) sum = sum + p0->num[i];
+    printf("sum=%d\n", sum);
+}
+
+int main(int argc, char* argv) {
+    //solve();
+    solve1();
 }
