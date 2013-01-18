@@ -66,6 +66,54 @@ int solve() {
     printf("sum = %d\n", sum);
 }
 
+/**
+ * recursive Stern-Brocot tree
+ */
+int countSB(int limit, int left, int right) {
+    int med = left + right;
+    if (med > limit) return 0;
+    int cnt = 1;
+    cnt = cnt + countSB(limit, left, med);
+    cnt = cnt + countSB(limit, med, right);
+    return cnt;
+}
+int solve1() {
+    int cnt = countSB(12000, 3, 2);
+    printf("count = %d\n", cnt);
+}
+
+/**
+ * non-recursive Stern-Brocot tree
+ */
+int solve2() {
+    int limit = 12000;
+    int cnt = 0;
+    int top = 0;
+    int stack[12000/2];
+    int left = 3;
+    int right = 2;
+    while (1) {
+        int med = left + right;
+        if (med > limit) {
+            if (top > 0) {
+                left = right;
+                top--;
+                right = stack[top];
+            } else {
+                break;
+            }
+        } else {
+            cnt = cnt + 1;
+            stack[top] = right;
+            top++;
+            right = med;
+        }
+    }
+    printf("count = %d\n", cnt);
+}
+
 int main(int argc, char* argv) {
-    solve();
+    //solve();
+    //solve1();
+    solve2();
 }
