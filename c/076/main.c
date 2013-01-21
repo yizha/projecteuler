@@ -47,7 +47,8 @@ void solve() {
         }
     }
 
-    printf("summation count of %d --> %d\n", 100, cnt_full_summations(100, 100) - 1);
+    int n = CACHE_LIMIT - 1;
+    printf("summation count of %d --> %d\n", n, cnt_full_summations(n, n) - 1);
 }
 
 int main(int argc, char* argv) {
