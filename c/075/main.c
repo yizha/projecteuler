@@ -71,22 +71,6 @@ void solve() {
     printf("count = %d\n", cnt);
 }
 
-int gcd(int m, int n) {
-    if (m == n) return m;
-    if (m > n && (m % n) == 0) return n;
-    if (m < n && (n % m) == 0) return m;
-    int t = m - n;
-    int x = t < 0 ? -t : t;
-    while (x > 1) {
-        if ((m % x) == 0 && (n % x) == 0) return x;
-        m = m < n ? m : n;
-        n = x;
-        t = m - n;
-        x = t < 0 ? -t : t;
-    }   
-    return 1;
-}
-
 int main(int argc, char* argv) {
     solve();
     return 0;
