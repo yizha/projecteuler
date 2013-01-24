@@ -152,8 +152,12 @@ void simple() {
         }
     }
     //printf("%d -> %d\n", target - 1, ways[target - 1]);
-    for (int i = 10; i < 101; i++) {
-        if (ways[i] > 5000) {
+    for (int i = 4; i < 101; i++) {
+        //printf("%d --> %d\n", i, ways[i]);
+        if (numbers[i] == 1 && (ways[i] - 1) > 5000) { // "prime(itself) + 0" is counted as one way
+            printf("%d --> %d\n", i, ways[i] - 1);
+            break;
+        } else if (numbers[i] == 0 && ways[i] > 5000) {
             printf("%d --> %d\n", i, ways[i]);
             break;
         }
@@ -164,5 +168,9 @@ int main(int argc, char* argv) {
     generate_primes();
     //solve();
     simple();
+    /*printf("\n");
+    for (int i = 4; i < 101; i++) {
+        printf("%d --> %d\n", i, count_ways(i));
+    }*/
     return 0;
 }
